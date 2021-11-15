@@ -56,3 +56,21 @@ label.upload-label {
 img[src=""] {
   display: none;
 }
+
+a.download-url {
+  color: #fff;
+  text-decoration: none;
+}
+
+a.download-url:hover {
+  color: #fff;
+  text-decoration: none;
+}
+
+button:disabled {
+  background-color: gray;
+}
+
+button:disabled:hover {
+  background-color: gray;
+}

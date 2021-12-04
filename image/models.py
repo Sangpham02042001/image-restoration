@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.files.uploadedfile import InMemoryUploadedFile
 import uuid
+import numpy as np
+from enhancer.Enhancer import Deblurrer
 from PIL import Image as _Image
 from io import BytesIO
 import sys
@@ -12,17 +14,21 @@ class Image(models.Model):
         default=uuid.uuid4, editable=False, primary_key=True)
     name = models.TextField(default='')
     image = models.ImageField(upload_to="images")
+    deblurrer = Deblurrer()
 
     def __str__(self):
         return str(self.unique_id)
 
     def save(self):
         img = _Image.open(self.image)
+        img = np.array(img)
+        img_enhanced = self.deblurrer.enhance(img)
 
         # transform image here
         output = BytesIO()
+        im = _Image.fromarray(img_enhanced)
 
-        im = img.resize((400, 400))
+        # im = img.resize((400, 400))
 
         im.save(output, format='JPEG', quality=100)
         output.seek(0)

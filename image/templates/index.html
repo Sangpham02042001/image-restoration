@@ -36,20 +36,42 @@
 
         {% csrf_token %}
         <!-- {{form.as_p}} -->
-        <div class="fieldWrapper">
+        <div class="field-wrapper">
           <label for="id_image" class="upload-label">
             <span>Choose Image</span>
             <img class="upload-icon" src="{% static 'upload-file.svg'%}" />
           </label>
           {{form.image}}
+
+          <div class="checkbox-list"> 
+            <span>
+              {{form.deblur}}
+              <label for="id_deblur">
+                Deblur
+              </label>
+            </span>
+
+            <span>
+              {{form.denoise}}
+              <label for="id_denoise">
+                Denoise
+              </label>
+            </span>
+
+            <span>
+              {{form.super_resolve}}
+              <label for="id_super_resolve">
+                Super Resolve
+              </label>
+            </span>
+          </div>
         </div>
         <div style="text-align: right; margin-top: 10px;">
+          <button class="btn btn-lg my-btn" onclick="handleReload(event)" style="padding: 6px 15px 6px 30px;">
+            <img src="{% static 'icon.svg'%}" />
+          </button>
           <button id="submit_form" class="btn btn-lg my-btn" onclick="handleSubmit(event)">
-            {% if obj %}
-              Upload another
-            {% else %}
-              Upload
-            {% endif %}
+            Upload
           </button>
         </div>
       </form>
@@ -68,7 +90,7 @@
         </div>
       {% endif %}
 
-      <div style="max-width: 800px;">
+      <div style="max-width: 800px;" id="preview-container">
         <h3 id="preview-title">Preview: </h3>
         <img src="" id="image-preview"
           alt="image" class="image-uploaded" />

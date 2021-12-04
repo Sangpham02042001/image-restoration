@@ -12,12 +12,18 @@ class Image(models.Model):
         default=uuid.uuid4, editable=False, primary_key=True)
     name = models.TextField(default='')
     image = models.ImageField(upload_to="images")
+    deblur = models.BooleanField(default=False)
+    denoise = models.BooleanField(default=False)
+    super_resolve = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.unique_id)
 
     def save(self):
         img = _Image.open(self.image)
+        print(self.deblur)
+        print(self.denoise)
+        print(self.super_resolve)
 
         # transform image here
         output = BytesIO()
@@ -26,8 +32,8 @@ class Image(models.Model):
 
         im.save(output, format='JPEG', quality=100)
         output.seek(0)
-        self.image = InMemoryUploadedFile(output, 'ImageField', str(self.unique_id) + "%s.jpg" % self.image.name.split(
-            '.')[0], 'image/jpeg', sys.getsizeof(output), None)
+        self.image = InMemoryUploadedFile(output, 'ImageField', str(
+            self.unique_id) + ".jpg", 'image/jpeg', sys.getsizeof(output), None)
         self.name = "%s.jpg" % self.image.name.split(
             '.')[0]
 

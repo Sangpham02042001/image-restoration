@@ -4,6 +4,7 @@ if (window.history.replaceState) {
 
 let myImage = document.getElementById('id_image')
 let previewTitle = document.getElementById('preview-title')
+let previewContainer = document.getElementById('preview-container')
 let uploadBtn = document.getElementById('submit_form')
 uploadBtn.disabled = true
 previewTitle.style.display = 'none'
@@ -14,6 +15,7 @@ myImage.onchange = () => {
     document.getElementById('image-preview').src = src
     uploadBtn.disabled = false
     previewTitle.style.display = 'block'
+    previewContainer.style.display = 'block'
   }
 }
 
@@ -30,5 +32,11 @@ function handleSubmit(e) {
   document.getElementById('image-preview').src = ""
   uploadBtn.disabled = true
   previewTitle.style.display = 'none'
+  previewContainer.style.display = 'none'
   document.getElementById('form').submit()
+}
+
+function handleReload(e) {
+  e.preventDefault()
+  location.reload()
 }

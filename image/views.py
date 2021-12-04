@@ -15,11 +15,9 @@ def index(request):
         if form.is_valid():
             form.save()
             obj = form.instance
-            print(obj)
             return render(request, "index.html", {"obj": obj, "form": ImageForm()})
     else:
         form = ImageForm()
-        img = Image.objects.all()
     return render(request, "index.html", {"form": form})
 
 

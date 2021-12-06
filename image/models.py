@@ -1,8 +1,7 @@
 from django.db import models
 from django.core.files.uploadedfile import InMemoryUploadedFile
 import uuid
-import numpy as np
-from enhancer.Enhancer import Deblurrer
+from enhancer.Enhancer import Deblurrer, Denoiser
 from PIL import Image as _Image
 from io import BytesIO
 import sys
@@ -18,18 +17,22 @@ class Image(models.Model):
     denoise = models.BooleanField(default=False)
     super_resolve = models.BooleanField(default=False)
     deblurrer = Deblurrer()
+    denoiser = Denoiser()
 
     def __str__(self):
         return str(self.unique_id)
 
     def save(self):
-        img = _Image.open(self.image)
-        print(self.deblur)
-        print(self.denoise)
-        print(self.super_resolve)
+        img = _Image.open(self.image).convert('RGB')
 
-        img = np.array(img)
-        img_enhanced = self.deblurrer.enhance(img)
+        img_enhanced = img
+
+        if self.denoise:
+            img_enhanced = self.denoiser.enhance(img_enhanced)
+        if self.deblur:
+            img_enhanced = self.deblurrer.enhance(img_enhanced)
+        if self.super_resolve:
+            pass
 
         # transform image here
         output = BytesIO()

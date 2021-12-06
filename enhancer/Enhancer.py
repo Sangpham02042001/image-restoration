@@ -4,7 +4,8 @@ import cv2
 import torch
 import torch.nn.functional as F
 import torchvision.transforms.functional as TF
-from enhancer.models.MPRNet_compact import MPRNetCompact
+from enhancer.models.MPRNet_denoise import MPRNetDenoise
+from enhancer.models.MPRNet_deblur import MPRNetDeblur
 from enhancer.resources.const import DEBLUR_MODEL_PATH, DENOISE_MODEL_PATH
 from skimage import img_as_ubyte
 from enhancer.utils import load_checkpoint
@@ -27,14 +28,13 @@ class ImageEnhancer:
         padw = W - w if w % factor != 0 else 0
 
         input_padded = F.pad(img_tensor, (0, padw, 0, padh), "reflect")
-        output = self.model_restoration(input_padded)
+        with torch.no_grad():
+            output = self.model_restoration(input_padded)
         output = torch.clamp(output[0], 0, 1)
 
         output = output[:, :, :h, :w]
         output = output.permute(0, 2, 3, 1)[0].cpu().detach().numpy()
         output_img = img_as_ubyte(output)
-
-        print(output_img.shape)
 
         return output_img
 
@@ -43,17 +43,17 @@ class Deblurrer(ImageEnhancer):
     def __init__(self):
         super(Deblurrer, self).__init__()
 
-        self.model_restoration = MPRNetCompact().cuda()
+        self.model_restoration = MPRNetDeblur().cuda()
         load_checkpoint(self.model_restoration, DEBLUR_MODEL_PATH)
 
         self.model_restoration.eval()
 
 
-def Denoiser(ImageEnhancer):
+class Denoiser(ImageEnhancer):
     def __init__(self):
         super(Denoiser, self).__init__()
 
-        self.model_restoration = MPRNetCompact().cuda()
+        self.model_restoration = MPRNetDenoise().cuda()
         load_checkpoint(self.model_restoration, DENOISE_MODEL_PATH)
 
         self.model_restoration.eval()
@@ -65,12 +65,12 @@ def SuperResolver(ImageEnhancer):
 
 
 if __name__ == "__main__":
-    deblurrer = Deblurrer()
+    deblurrer = Denoiser()
 
     start = timer()
-    img_enhanced = deblurrer.enhance("imgs/scene024-16.png")
+    img_enhanced = deblurrer.enhance("enhancer/imgs/test_denoise.png")
     end = timer()
 
     print(end - start)
 
-    cv2.imwrite("imgs/scene024-16_enhanced.png", cv2.cvtColor(img_enhanced, cv2.COLOR_RGB2BGR))
+    cv2.imwrite("enhancerimgs/test_denoise_enhanced.png", cv2.cvtColor(img_enhanced, cv2.COLOR_RGB2BGR))

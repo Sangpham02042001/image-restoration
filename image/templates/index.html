@@ -14,7 +14,7 @@
     <title>Image Restoration</title>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #1962a7;">
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #1962a7; position: sticky; top: 0;">
       <a class="navbar-brand my-nav" href="#">
         <img src="{% static 'icon.svg'%}" />
         <h3 style="margin-bottom: 0; color: white;">Image Restoration</h3>
@@ -32,7 +32,8 @@
       </div> -->
     </nav>
     <div class="container my-container">
-      <form action="." id="form" method="post" enctype="multipart/form-data">
+      <form action="." id="form" method="post" enctype="multipart/form-data"
+        style="margin-right: 20px;">
 
         {% csrf_token %}
         <!-- {{form.as_p}} -->
@@ -76,24 +77,26 @@
         </div>
       </form>
 
-      {% if obj %}
-        <div style="margin: 20px 0; max-width: 800px;">
-          <h3 style="display: flex; justify-content: space-between; align-items: center;">
-            Succesfully uploaded 
-            <button class="btn btn-lg my-btn">
-		    <a class="download-url" href="/images/{{obj.unique_id}}/download">Download</a>
-            </button>
-          </h3>
-          <!-- {{obj.image}} -->
-          <img src="{{ obj.image.url}}"
+      <div> 
+        {% if obj %}
+          <div style="margin: 20px 0; max-width: 800px;">
+            <h3 style="display: flex; align-items: center;">
+              Succesfully uploaded 
+              <button class="btn btn-lg my-btn" style="margin-left: 15px;">
+                <a class="download-url" href="/images/{{obj.unique_id}}/download">Download</a>
+              </button>
+            </h3>
+            <!-- {{obj.image}} -->
+            <img src="{{ obj.image.url}}"
+              alt="image" class="image-uploaded" />
+          </div>
+        {% endif %}
+
+        <div style="max-width: 800px;" id="preview-container">
+          <h3 id="preview-title">Preview</h3>
+          <img src="" id="image-preview"
             alt="image" class="image-uploaded" />
         </div>
-      {% endif %}
-
-      <div style="max-width: 800px;" id="preview-container">
-        <h3 id="preview-title">Preview: </h3>
-        <img src="" id="image-preview"
-          alt="image" class="image-uploaded" />
       </div>
 
         <!-- {% for x in img %}

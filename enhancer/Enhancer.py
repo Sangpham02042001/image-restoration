@@ -6,7 +6,8 @@ import torch.nn.functional as F
 import torchvision.transforms.functional as TF
 from enhancer.models.MPRNet_denoise import MPRNetDenoise
 from enhancer.models.MPRNet_deblur import MPRNetDeblur
-from enhancer.resources.const import DEBLUR_MODEL_PATH, DENOISE_MODEL_PATH
+from enhancer.models.network_swinir import SwinIR
+from enhancer.resources.const import DEBLUR_MODEL_PATH, DENOISE_MODEL_PATH, SR_MODEL_PATH
 from skimage import img_as_ubyte
 from enhancer.utils import load_checkpoint
 
@@ -30,9 +31,11 @@ class ImageEnhancer:
         input_padded = F.pad(img_tensor, (0, padw, 0, padh), "reflect")
         with torch.no_grad():
             output = self.model_restoration(input_padded)
-        output = torch.clamp(output[0], 0, 1)
+            if type(output) == list:
+                output = output[0]
+        output = torch.clamp(output, 0, 1)
 
-        output = output[:, :, :h, :w]
+        # output = output[:, :, :h, :w]
         output = output.permute(0, 2, 3, 1)[0].cpu().detach().numpy()
         output_img = img_as_ubyte(output)
 
@@ -59,9 +62,17 @@ class Denoiser(ImageEnhancer):
         self.model_restoration.eval()
 
 
-def SuperResolver(ImageEnhancer):
+class SuperResolver(ImageEnhancer):
     def __init__(self):
-        pass
+        param_key_g = 'params_ema'
+        self.model_restoration = SwinIR(upscale=4, in_chans=3, img_size=64, window_size=8,
+                                        img_range=1., depths=[6, 6, 6, 6, 6, 6], embed_dim=180, num_heads=[6, 6, 6, 6, 6, 6],
+                                        mlp_ratio=2, upsampler='nearest+conv', resi_connection='1conv').cuda()
+
+        pretrained_model = torch.load(SR_MODEL_PATH)
+        self.model_restoration.load_state_dict(pretrained_model[param_key_g] if param_key_g in pretrained_model.keys() else pretrained_model, strict=True)
+
+        self.model_restoration.eval()
 
 
 if __name__ == "__main__":
